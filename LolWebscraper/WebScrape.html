@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>LoL Esports Information</title>
+  </head>
+  <body>
+    <h1>LoL Esports Information</h1>
+    <div id="esports-info"></div>
+
+    <script>
+      async function fetchMatchInfo() {
+        try {
+          const response = await fetch("website.html");
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+          const text = await response.text();
+
+          // Use a regular expression to find the JSON data
+          const regex = /{"__typename":"EventMatch"[\s\S]*?,"streams":\[\]}/g;
+          const matches = text.match(regex);
+
+          if (!matches) {
+            throw new Error("No matching data found");
+          }
+
+          // Parse the matched data as JSON
+          const jsonData = matches.map((match) => JSON.parse(match));
+
+          // Extract the required information
+          const extractedData = jsonData.map((match) => ({
+            id: match.id,
+            blockName: match.blockName,
+            startTime: match.startTime,
+            state: match.state,
+            league: {
+              name: match.league.name,
+              image: match.league.image,
+            },
+            tournament: match.tournament.name,
+            teams: match.match.matchTeams.map((team) => ({
+              name: team.name,
+              image: team.image,
+              code: team.code,
+            })),
+            strategy: match.match.strategy,
+          }));
+
+          // Display the extracted information
+          document.getElementById(
+            "esports-info"
+          ).innerHTML = `<pre>${JSON.stringify(extractedData, null, 2)}</pre>`;
+        } catch (error) {
+          document.getElementById("esports-info").innerHTML =
+            "Error fetching data: " + error.message;
+        }
+      }
+
+      document.addEventListener("DOMContentLoaded", fetchMatchInfo);
+    </script>
+  </body>
+</html>
