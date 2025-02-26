@@ -11,9 +11,18 @@ await pb
 pb.autoCancellation(false);
 
 const data = JSON.parse(await readFile("./LOL.json"));
+const videoGameName = "League of Legends";
 
-while (data.length) {
-  const chunk = data.splice(0, 1000);
+const flattenData = data.map((item) => ({
+  ...item,
+  league_name: item.league?.name || null,
+  league_image: item.league?.image || null,
+  videoGame: videoGameName,
+  league: undefined, // Remove the nested league object
+}));
+
+while (flattenData.length) {
+  const chunk = flattenData.splice(0, 1000);
   const promises = [];
 
   for (let item of chunk) {
